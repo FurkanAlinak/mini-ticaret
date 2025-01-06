@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const ERR = require('../util/error');
 const User = require('../model/user');
+const APIError = require('../util/error');
 require('dotenv').config();
 
 const createToken = async (user, res) => {
@@ -8,6 +9,8 @@ const createToken = async (user, res) => {
         const payload = {
             id: user._id,
             email: user.email,
+            role:user.role
+            
         };
 
         
@@ -27,7 +30,7 @@ const createToken = async (user, res) => {
             message: "Başarılı Token"
         });
     } catch (error) {
-        console.error('Error creating token:', error);
+        console.error('Başarısız token:', error);
         return res.status(500).json({
             success: false,
             message: "Token oluşturulamadı",
@@ -35,17 +38,46 @@ const createToken = async (user, res) => {
         });
     }
 };
-
 const verifyToken = async (req, res, next) => {
-    // Token kontrolü
-    const headerToken = req.headers.authorization && req.headers.authorization.startsWith("Bearer ");
-    if (!headerToken) {
-        throw new ERR("Token Bulunamadı", 401);
+    try {
+        // Authorization Header'dan Bearer Token'ı al
+        const headerToken = req.headers.authorization && req.headers.authorization.startsWith("Bearer ");
+        if (!headerToken) {
+            throw new ERR("Token Bulunamadı", 401);
+        }
+
+        // Bearer'dan sonra gelen token kısmını al
+        const token = req.headers.authorization.split(" ")[1];
+        console.log("Token:", token);
+
+        // Token doğrulama
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        console.log("Decoded:", decoded);
+
+        // Veritabanından kullanıcıyı bul
+        const userInfo = await User.findById(decoded.id).select("_id email role name  surname");
+        if (!userInfo) {
+            throw new ERR("Geçersiz Token", 401);
+        }
+
+        // Kullanıcı bilgilerini req objesine ekle
+        req.user = userInfo;
+        console.log("Kullanıcı Bilgileri",userInfo)
+        next(); // Bir sonraki middleware'e geç
+    } catch (error) {
+        console.error("Token doğrulama hatası:", error.message);
+        res.status(error.status || 500).json({
+            success: false,
+            message: error.message || "Token doğrulama sırasında bir hata oluştu",
+        });
     }
-    // Token kontrolü devamı...
 };
+
+
+
 
 module.exports = {
     createToken,
-    verifyToken
+    verifyToken,
+    
 };

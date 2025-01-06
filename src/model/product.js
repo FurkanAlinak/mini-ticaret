@@ -9,7 +9,7 @@ const productSchema = new mongoose.Schema({
     },//ürün adı
     description: {
         type: String,
-        required: true,
+        required: false,
         trim: true
     },//açıklama
     price: {
@@ -22,11 +22,6 @@ const productSchema = new mongoose.Schema({
         required: true,
         trim: true
     },//kategori
-    image: {
-        type: String,
-        required: true,
-        trim: true
-    },//resim
     brand: {
         type: String,
         required: true,
