@@ -1,79 +1,92 @@
 const joi = require('joi');
-const ERR = require('../util/error');
+const APIError = require('../util/error');
 
 class Validation {
-    constructor(){}
-    static register = async ( req,res,next)=>{
+    static register = async (req, res, next) => {
         try {
-            await joi.object({
-                name:joi.string().trim().min(2).max(10).required().messages({
-                    "string.base":"İsim Alanı Normal Metin Olmalıdır(,.!* Karakterleri girmeyin)",
-                    "string.empty":"İsim Alanı Boş Olamaz",
-                    "string.max":"İsim Alanı Max 10 karaketerli olmalı",
-                    "string.min":"İsim alanı min 2 karakterli olmalı",
-                    "string.required":"İsim alanı zorunludur"
-                }),
-                surname:joi.string().trim().min(2).max(15).required().messages({
-                    "string.base":"İsim Alanı Normal Metin Olmalıdır(,.!* Karakterleri girmeyin)",
-                    "string.empty":"İsim Alanı Boş Olamaz",
-                    "string.max":"İsim Alanı Max 15 karaketerli olmalı",
-                    "string.min":"İsim alanı min 2 karakterli olmalı",
-                    "string.required":"Soyad alanı zorunludur"
-                }),
-                email:joi.string().email().trim().min(2).max(25).required().messages({
-                    "string.base":"E-Mail Alanı Normal Metin Olmalıdır(,.!* Karakterleri girmeyin)",
-                    "string.empty":"E-Mail Alanı Boş Olamaz",
-                    "string.max":"E-Mail Alanı Max 25 karaketerli olmalı",
-                    "string.email":"Lütfen Geçerli Bir E-mail Giriniz",
-                    "string.min":"E-Mail alanı min 2 karakterli olmalı",
-                    "string.required":"E-Mail alanı zorunludur"
-                }),
-                password:joi.string().trim().min(6).max(20).required().messages({
-                    "string.base":"Şifreniz Alanı Normal Metin Olmalıdır(,.!* Karakterleri girmeyin)",
-                    "string.empty":"Şifreniz Alanı Boş Olamaz",
-                    "string.max":"Şifreniz Alanı Max 20 karaketerli olmalı",
-                    "string.min":"Şifreniz alanı min 6 karakterli olmalı",
-                    "string.required":"Şifreniz alanı zorunludur"
+            await joi
+                .object({
+                    name: joi.string().min(2).max(10).required().messages({
+                        "string.base": "İsim alanı metin olmalıdır.",
+                        "string.empty": "İsim alanı boş bırakılamaz.",
+                        "string.min": "İsim alanı en az 2 karakter olmalıdır.",
+                        "string.max": "İsim alanı en fazla 10 karakter olmalıdır.",
+                        "any.required": "İsim alanı zorunludur.",
+                    }),
+                    surname: joi.string().min(2).max(15).required().messages({
+                        "string.base": "Soyad alanı metin olmalıdır.",
+                        "string.empty": "Soyad alanı boş bırakılamaz.",
+                        "string.min": "Soyad alanı en az 2 karakter olmalıdır.",
+                        "string.max": "Soyad alanı en fazla 15 karakter olmalıdır.",
+                        "any.required": "Soyad alanı zorunludur.",
+                    }),
+                    email: joi.string().email().required().messages({
+                        "string.base": "E-posta alanı metin olmalıdır.",
+                        "string.empty": "E-posta alanı boş bırakılamaz.",
+                        "string.email": "Geçerli bir e-posta adresi giriniz.",
+                        "any.required": "E-posta alanı zorunludur.",
+                    }),
+                    password: joi.string().min(6).max(20).required().messages({
+                        "string.base": "Şifre alanı metin olmalıdır.",
+                        "string.empty": "Şifre alanı boş bırakılamaz.",
+                        "string.min": "Şifre alanı en az 6 karakter olmalıdır.",
+                        "string.max": "Şifre alanı en fazla 20 karakter olmalıdır.",
+                        "any.required": "Şifre alanı zorunludur.",
+                    }),
                 })
-            }).validateAsync(req.body)
-            
+                .validateAsync(req.body);
         } catch (error) {
-           if(error.details && error ?.details[0].message)
-            throw new ERR(error.details[0].message, 400)
-        else throw new ERR("Lütfen Validasyon kurallarına uyun")
-            
+            if (error.details && error.details[0].message) {
+                return next(new APIError(error.details[0].message, 400)); // Özelleştirilmiş hata mesajı
+            }
+            return next(new APIError('Lütfen validasyon kurallarına uyun.', 400));
         }
         next();
-    }
-    
-    static login = async (req,res,next)=>{
+    };
+
+
+    static login = async (req, res, next) => {
         try {
-            await joi.object({
-                email:joi.string().email().trim().min(2).max(25).required().messages({
-                    "string.base":"E-Mail Alanı Normal Metin Olmalıdır(,.!* Karakterleri girmeyin)",
-                    "string.empty":"E-Mail Alanı Boş Olamaz",
-                    "string.max":"E-Mail Alanı Max 25 karaketerli olmalı",
-                    "string.email":"Lütfen Geçerli Bir E-mail Giriniz",
-                    "string.min":"E-Mail alanı min 2 karakterli olmalı",
-                    "string.required":"E-Mail alanı zorunludur"
-                }),
-                password:joi.string().trim().min(6).max(20).required().messages({
-                    "string.base":"Şifreniz Alanı Normal Metin Olmalıdır(,.!* Karakterleri girmeyin)",
-                    "string.empty":"Şifreniz Alanı Boş Olamaz",
-                    "string.max":"Şifreniz Alanı Max 20 karaketerli olmalı",
-                    "string.min":"Şifreniz alanı min 6 karakterli olmalı",
-                    "string.required":"Şifreniz alanı zorunludur"
+            await joi
+                .object({
+                    email: joi
+                        .string()
+                        .email()
+                        .trim()
+                        .min(2)
+                        .max(25)
+                        .required()
+                        .messages({
+                            'string.base': 'E-Mail Alanı Normal Metin Olmalıdır (,.!* Karakterleri girmeyin)',
+                            'string.empty': 'E-Mail Alanı Boş Olamaz',
+                            'string.max': 'E-Mail Alanı Max 25 karakterli olmalı',
+                            'string.email': 'Lütfen Geçerli Bir E-mail Giriniz',
+                            'string.min': 'E-Mail Alanı Min 2 karakterli olmalı',
+                            'string.required': 'E-Mail Alanı Zorunludur',
+                        }),
+                    password: joi
+                        .string()
+                        .trim()
+                        .min(6)
+                        .max(20)
+                        .required()
+                        .messages({
+                            'string.base': 'Şifre Alanı Normal Metin Olmalıdır (,.!* Karakterleri girmeyin)',
+                            'string.empty': 'Şifre Alanı Boş Olamaz',
+                            'string.max': 'Şifre Alanı Max 20 karakterli olmalı',
+                            'string.min': 'Şifre Alanı Min 6 karakterli olmalı',
+                            'string.required': 'Şifre Alanı Zorunludur',
+                        }),
                 })
-            }).validateAsync(req.body)
-            
+                .validateAsync(req.body);
         } catch (error) {
-            if(error.details && error ?.details[0].message)
-            throw new ERR(error.details[0].message, 400)
-        else throw new ERR("Lütfen Validasyon kurallarına uyun")
+            if (error.details && error.details[0].message) {
+                return next(new APIError(error.details[0].message, 400)); // Hata nesnesini ilet
+            }
+            return next(new APIError('Lütfen Validasyon Kurallarına Uyun', 400));
         }
         next();
-    }
+    };
 }
+
 module.exports = Validation;
-
-

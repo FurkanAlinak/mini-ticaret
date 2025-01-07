@@ -18,7 +18,7 @@ const createToken = async (user, res) => {
             throw new Error('TOKEN KEY bulunamadı');
         }
 
-        // Token oluşturuluyor jwt.sign = token oluşturur
+        
         const token = await jwt.sign(payload, process.env.JWT_SECRET_KEY, {
             algorithm: "HS512", // Algoritma
             expiresIn: '1h' // Süre

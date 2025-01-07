@@ -1,8 +1,9 @@
-const Product = require("../model/product")
+const Product = require("../model/product");
+const APIError = require("../util/error");
 require('axios');
 const Response = require("../util/response")
 //ürün ekleme
-const addProduct = async (req, res) => {
+const addProduct = async (req, res,next) => {
     try {
         const { name, price, description, category, brand } = req.body;
 
@@ -15,6 +16,9 @@ const addProduct = async (req, res) => {
             brand,
             createdBy: req.user._id, // Token'dan gelen admin bilgisi
         });
+        if(!price){
+            next(new APIError("Lütfen Fiyat Bilgisi Giriniz!!!",400));
+        }
         await newProduct.save();
         return res.status(201).json({
             success: true,

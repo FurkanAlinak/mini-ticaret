@@ -8,26 +8,12 @@ const Response = require("../util/response");
 const jwt = require('jsonwebtoken');
 
 // Kullanıcı kayıt işlemi
-const register = async (req, res) => {
-    const { email, password, name, surname } = req.body;
-    if (!name) {
-        return res.status(400).json({ message: "Adınızı Giriniz" });
-    }
-    if (!surname) {
-        return res.status(400).json({ message: "Soyadınızı Giriniz" });
-    }
-    if (!email) {
-        return res.status(400).json({ massage: "E-mailinizi Giriniz" })
-    }
-    if (!password) {
-        return res.status(400).json({ message: "Şifrenizi giriniz" });
-    }
-
-
+const register = async (req, res, next) => {
+    const { email } = req.body;
 
     const userCheck = await User.findOne({ email });
     if (userCheck) {
-        return res.status(400).json({ message: "Kullanıcı zaten kayıtlı" });
+        next(new APIError("Kullanıcı Zaten Kayıtlı Lütfen Giriş Yapmayı Deneyiniz.!!!", 400));
     }
 
     req.body.password = await bcrypt.hash(req.body.password, 8);
@@ -38,26 +24,30 @@ const register = async (req, res) => {
             return new Response(data, "Kullanıcı başarıyla oluşturuldu").created(res);
         })
         .catch((err) => {
+            console.log("Kullanıcı:Hatası")
             throw new APIError("Kullanıcı oluşturulamadı", 400);
         });
 };
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ message: "Email ve şifre gereklidir" });
+            // return res.status(400).json({ message: "Email ve şifre gereklidir" });
+            next(new APIError("Lütfen E-Mail-Şifrenizi Giriniz", 400));
         }
 
         const userInfo = await User.findOne({ email });
         if (!userInfo) {
-            return res.status(404).json({ message: "Kullanıcı bulunamadı" });
+            // return res.status(404).json({ message: "Kullanıcı bulunamadı" });
+            next(new APIError("Kullanıcı Bulunamadı Kayıt Olunuz", 400));
         }
 
         const passwordCheck = await bcrypt.compare(password, userInfo.password);
         if (!passwordCheck) {
-            return res.status(400).json({ message: "Şifre hatalı" });
+            // return res.status(400).json({ message: "Şifre hatalı" });
+            next(new APIError("E-Mail Veya Şifre Hatalı", 400));
         }
 
         createToken(userInfo, res);
@@ -71,16 +61,16 @@ const me = async (req, res) => {
     return new Response(req.user).succes(res)
 }
 
-const getProfile = async(req,res)=>{
+const getProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const user = await User.findById({userId}).select("-password")
-        if(!user){
-            res.status(404).json({message:"Kullanıcı Bulunamadı"});
+        const user = await User.findById({ userId }).select("-password")
+        if (!user) {
+            res.status(404).json({ message: "Kullanıcı Bulunamadı" });
         }
         res.status(200).json(user);
     } catch (error) {
-        res.status(404).json({message:"Kullanıcı Bulunurken Hata"});
+        res.status(404).json({ message: "Kullanıcı Bulunurken Hata" });
     }
 }
 
