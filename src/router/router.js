@@ -10,7 +10,7 @@ router.post("/register",Validation.register,register);
 router.post("/login",Validation.login,login);
 router.get("/profile",getProfile)
 router.get("/user",verifyToken,me)
-router.put("/update-password",verifyToken,updatePassword)
+router.put("/user/update-password",verifyToken,Validation.upgradePassword,updatePassword)
 router.get('/admin', verifyToken, roleCheck(['admin']), (req, res) => {
     res.status(200).json({
         success: true,

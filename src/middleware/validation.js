@@ -1,7 +1,5 @@
 const joi = require('joi');
 const APIError = require('../util/error');
-const { body } = require('express-validator');
-
 
 class Validation {
     static register = async (req, res, next) => {
@@ -35,18 +33,17 @@ class Validation {
                         "string.max": "Şifre alanı en fazla 20 karakter olmalıdır.",
                         "any.required": "Şifre alanı zorunludur.",
                     }),
-                    role: joi.string()
+                    role: joi.string(),
                 })
                 .validateAsync(req.body);
         } catch (error) {
             if (error.details && error.details[0].message) {
-                return next(new APIError(error.details[0].message, 400)); // Özelleştirilmiş hata mesajı
+                return next(new APIError(error.details[0].message, 400));
             }
             return next(new APIError('Lütfen validasyon kurallarına uyun.', 400));
         }
         next();
     };
-
 
     static login = async (req, res, next) => {
         try {
@@ -54,49 +51,62 @@ class Validation {
                 .object({
                     email: joi
                         .string().email().trim().min(2).max(25).required().messages({
-                            'string.base': 'E-Mail Alanı Normal Metin Olmalıdır (,.!* Karakterleri girmeyin)',
-                            'string.empty': 'E-Mail Alanı Boş Olamaz',
-                            'string.max': 'E-Mail Alanı Max 25 karakterli olmalı',
-                            'string.email': 'Lütfen Geçerli Bir E-mail Giriniz',
-                            'string.min': 'E-Mail Alanı Min 2 karakterli olmalı',
-                            'string.required': 'E-Mail Alanı Zorunludur',
+                            'string.base': 'E-Mail alanı metin olmalıdır.',
+                            'string.empty': 'E-Mail alanı boş bırakılamaz.',
+                            'string.max': 'E-Mail alanı en fazla 25 karakter olabilir.',
+                            'string.email': 'Geçerli bir e-posta adresi giriniz.',
+                            'string.min': 'E-Mail alanı en az 2 karakter olmalıdır.',
+                            'any.required': 'E-Mail alanı zorunludur.',
                         }),
                     password: joi
                         .string().min(6).max(20).required().messages({
-                            'string.base': 'Şifre Alanı Normal Metin Olmalıdır (,.!* Karakterleri girmeyin)',
-                            'string.empty': 'Şifre Alanı Boş Olamaz',
-                            'string.max': 'Şifre Alanı Max 20 karakterli olmalı',
-                            'string.min': 'Şifre Alanı Min 6 karakterli olmalı',
-                            'string.required': 'Şifre Alanı Zorunludur',
+                            'string.base': 'Şifre alanı metin olmalıdır.',
+                            'string.empty': 'Şifre alanı boş bırakılamaz.',
+                            'string.max': 'Şifre alanı en fazla 20 karakter olabilir.',
+                            'string.min': 'Şifre alanı en az 6 karakter olmalıdır.',
+                            'any.required': 'Şifre alanı zorunludur.',
                         }),
                 })
                 .validateAsync(req.body);
         } catch (error) {
             if (error.details && error.details[0].message) {
-                return next(new APIError(error.details[0].message, 400)); // Hata nesnesini ilet
+                return next(new APIError(error.details[0].message, 400));
             }
-            return next(new APIError('Lütfen Validasyon Kurallarına Uyun', 400));
+            return next(new APIError('Lütfen validasyon kurallarına uyun.', 400));
         }
         next();
     };
 
-    static upgradePassword = async (req, res) => {
+    static upgradePassword = async (req, res, next) => {
         try {
             await joi
-                .object({
-                    newpassword: joi
-                        .string.min(6).max(20).required().message({
-                            'string.base': 'Yeni Şifre Alanı Normal Metin Olmalıdır (,.!* Karakterleri girmeyin)',
-                            'string.empty': 'Yeni Şifre Alanı Boş Olamaz',
-                            'string.max': 'Yeni Şifre Alanı Max 20 karakterli olmalı',
-                            'string.min': 'Yeni Şifre Alanı Min 6 karakterli olmalı',
-                            'string.required': 'Yeni Şifre Alanı Zorunludur',
-                        })
-                })
+            .object({
+                currentPassword: joi
+                    .string().min(6).max(20).required().messages({
+                        'string.base': 'Mevcut şifre alanı metin olmalıdır.',
+                        'string.empty': 'Mevcut şifre alanı boş bırakılamaz.',
+                        'string.max': 'Mevcut şifre alanı en fazla 20 karakter olabilir.',
+                        'string.min': 'Mevcut şifre alanı en az 6 karakter olmalıdır.',
+                        'any.required': 'Mevcut şifre alanı zorunludur.',
+                    }),
+                newPassword: joi
+                    .string().min(6).max(20).required().messages({
+                        'string.base': 'Yeni şifre alanı metin olmalıdır.',
+                        'string.empty': 'Yeni şifre alanı boş bırakılamaz.',
+                        'string.max': 'Yeni şifre alanı en fazla 20 karakter olabilir.',
+                        'string.min': 'Yeni şifre alanı en az 6 karakter olmalıdır.',
+                        'any.required': 'Yeni şifre alanı zorunludur.',
+                    }),
+            })
+                .validateAsync(req.body);
         } catch (error) {
+            if (error.details && error.details[0].message) {
+                return next(new APIError(error.details[0].message, 400));
+            }
+            return next(new APIError('Lütfen validasyon kurallarına uyun.', 400));
         }
-    }
+        next();
+    };
 }
-module.exports = { validatePasswordUpdate };
 
 module.exports = Validation;

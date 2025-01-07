@@ -24,7 +24,7 @@ const register = async (req, res, next) => {
             return new Response(data, "Kullanıcı başarıyla oluşturuldu").created(res);
         })
         .catch((err) => {
-            console.log("Kullanıcı:Hatası")
+            
             throw new APIError("Kullanıcı oluşturulamadı", 400);
         });
 };
@@ -79,15 +79,19 @@ const updatePassword = async(req,res,next)=>{
         const userId = req.user.id;
         const { currentPassword, newPassword } = req.body;
         const user = await User.findById(userId);
+       
         if (!user) {
             return next(new APIError("Kullanıcı Bulunamadı", 400));
         }
+        
         const isMatch = await bcrypt.compare(currentPassword, user.password);
+        console.log(`Şifre eşleşmesi: ${isMatch}`);
         if (!isMatch) {
             return next(new APIError("Mevcut Şifreniz Yanlış", 400));
         }
+     
         const hashPassword = await bcrypt.hash(newPassword, 10);
-
+        console.log("Burda:" ,hashPassword)
         user.password = hashPassword;
         await user.save();
         return new Response(null, "Şifre Başarıyla Değiştirildi").success(res);

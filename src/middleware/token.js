@@ -48,11 +48,11 @@ const verifyToken = async (req, res, next) => {
 
         // Bearer'dan sonra gelen token kısmını al
         const token = req.headers.authorization.split(" ")[1];
-        console.log("Token:", token);
+        //console.log("Token:", token);
 
         // Token doğrulama
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        console.log("Decoded:", decoded);
+        //console.log("Decoded:", decoded);
 
         // Veritabanından kullanıcıyı bul
         const userInfo = await User.findById(decoded.id).select("_id email role name  surname");
@@ -62,7 +62,7 @@ const verifyToken = async (req, res, next) => {
 
         // Kullanıcı bilgilerini req objesine ekle
         req.user = userInfo;
-        console.log("Kullanıcı Bilgileri",userInfo)
+        //console.log("Kullanıcı Bilgileri",userInfo)
         next(); // Bir sonraki middleware'e geç
     } catch (error) {
         console.error("Token doğrulama hatası:", error.message);
