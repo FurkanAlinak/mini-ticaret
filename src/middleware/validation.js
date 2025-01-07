@@ -1,5 +1,7 @@
 const joi = require('joi');
 const APIError = require('../util/error');
+const { body } = require('express-validator');
+
 
 class Validation {
     static register = async (req, res, next) => {
@@ -51,13 +53,7 @@ class Validation {
             await joi
                 .object({
                     email: joi
-                        .string()
-                        .email()
-                        .trim()
-                        .min(2)
-                        .max(25)
-                        .required()
-                        .messages({
+                        .string().email().trim().min(2).max(25).required().messages({
                             'string.base': 'E-Mail Alanı Normal Metin Olmalıdır (,.!* Karakterleri girmeyin)',
                             'string.empty': 'E-Mail Alanı Boş Olamaz',
                             'string.max': 'E-Mail Alanı Max 25 karakterli olmalı',
@@ -66,12 +62,7 @@ class Validation {
                             'string.required': 'E-Mail Alanı Zorunludur',
                         }),
                     password: joi
-                        .string()
-                        .trim()
-                        .min(6)
-                        .max(20)
-                        .required()
-                        .messages({
+                        .string().min(6).max(20).required().messages({
                             'string.base': 'Şifre Alanı Normal Metin Olmalıdır (,.!* Karakterleri girmeyin)',
                             'string.empty': 'Şifre Alanı Boş Olamaz',
                             'string.max': 'Şifre Alanı Max 20 karakterli olmalı',
@@ -88,6 +79,24 @@ class Validation {
         }
         next();
     };
+
+    static upgradePassword = async (req, res) => {
+        try {
+            await joi
+                .object({
+                    newpassword: joi
+                        .string.min(6).max(20).required().message({
+                            'string.base': 'Yeni Şifre Alanı Normal Metin Olmalıdır (,.!* Karakterleri girmeyin)',
+                            'string.empty': 'Yeni Şifre Alanı Boş Olamaz',
+                            'string.max': 'Yeni Şifre Alanı Max 20 karakterli olmalı',
+                            'string.min': 'Yeni Şifre Alanı Min 6 karakterli olmalı',
+                            'string.required': 'Yeni Şifre Alanı Zorunludur',
+                        })
+                })
+        } catch (error) {
+        }
+    }
 }
+module.exports = { validatePasswordUpdate };
 
 module.exports = Validation;

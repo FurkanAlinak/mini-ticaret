@@ -74,9 +74,32 @@ const getProfile = async (req, res) => {
     }
 }
 
+const updatePassword = async(req,res,next)=>{
+    try {
+        const userId = req.user.id;
+        const { currentPassword, newPassword } = req.body;
+        const user = await User.findById(userId);
+        if (!user) {
+            return next(new APIError("Kullanıcı Bulunamadı", 400));
+        }
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return next(new APIError("Mevcut Şifreniz Yanlış", 400));
+        }
+        const hashPassword = await bcrypt.hash(newPassword, 10);
+
+        user.password = hashPassword;
+        await user.save();
+        return new Response(null, "Şifre Başarıyla Değiştirildi").success(res);
+    } catch (error) {
+        return next(new APIError("Şifre Güncellenirken Hata Oluştu", 500));
+    }
+}
+
 module.exports = {
     register,
     login,
     me,
-    getProfile
+    getProfile,
+    updatePassword
 };
