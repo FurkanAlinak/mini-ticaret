@@ -6,6 +6,8 @@ const axios = require('axios'); // Axios çağrıldı
 const bcrypt = require('bcrypt'); // Bcrypt çağrıldı
 const Response = require("../util/response");
 const jwt = require('jsonwebtoken');
+require("body-parser");
+
 
 // Kullanıcı kayıt işlemi
 const register = async (req, res, next) => {
@@ -24,7 +26,7 @@ const register = async (req, res, next) => {
             return new Response(data, "Kullanıcı başarıyla oluşturuldu").created(res);
         })
         .catch((err) => {
-            
+
             throw new APIError("Kullanıcı oluşturulamadı", 400);
         });
 };
@@ -74,31 +76,33 @@ const getProfile = async (req, res) => {
     }
 }
 
-const updatePassword = async(req,res,next)=>{
+const updatePassword = async (req, res, next) => {
     try {
-        const userId = req.user.id;
-        const { currentPassword, newPassword } = req.body;
-        const user = await User.findById(userId);
-       
+        const { email, currentPassword, newPassword } = req.body;
+
+        // Kullanıcıyı veritabanında arayın
+        const user = await User.findOne({ email });
         if (!user) {
             return next(new APIError("Kullanıcı Bulunamadı", 400));
         }
-        
+
+        // Mevcut şifreyi doğrula
         const isMatch = await bcrypt.compare(currentPassword, user.password);
-        console.log(`Şifre eşleşmesi: ${isMatch}`);
         if (!isMatch) {
             return next(new APIError("Mevcut Şifreniz Yanlış", 400));
         }
-     
-        const hashPassword = await bcrypt.hash(newPassword, 10);
-        console.log("Burda:" ,hashPassword)
+
+        // Yeni şifreyi hash'le
+        const hashPassword = await bcrypt.hash(newPassword, 8);
         user.password = hashPassword;
         await user.save();
+
         return new Response(null, "Şifre Başarıyla Değiştirildi").success(res);
     } catch (error) {
+        console.error("Şifre Güncellenirken Hata Oluştu: ", error);
         return next(new APIError("Şifre Güncellenirken Hata Oluştu", 500));
     }
-}
+};
 
 module.exports = {
     register,

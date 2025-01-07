@@ -81,6 +81,15 @@ class Validation {
         try {
             await joi
             .object({
+                email: joi
+                        .string().email().trim().min(2).max(25).required().messages({
+                            'string.base': 'E-Mail alanı metin olmalıdır.',
+                            'string.empty': 'E-Mail alanı boş bırakılamaz.',
+                            'string.max': 'E-Mail alanı en fazla 25 karakter olabilir.',
+                            'string.email': 'Geçerli bir e-posta adresi giriniz.',
+                            'string.min': 'E-Mail alanı en az 2 karakter olmalıdır.',
+                            'any.required': 'E-Mail alanı zorunludur.',
+                        }),
                 currentPassword: joi
                     .string().min(6).max(20).required().messages({
                         'string.base': 'Mevcut şifre alanı metin olmalıdır.',
