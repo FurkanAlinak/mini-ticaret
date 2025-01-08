@@ -8,7 +8,7 @@ const Validasyon = require("../middleware/productValidation");
 //User Router.
 router.post("/register",Validation.register,register);
 router.post("/login",Validation.login,login);
-router.get("/profile",getProfile)
+router.get("/profile",verifyToken,getProfile)
 router.get("/user",verifyToken,me)
 router.put("/user/update-password",verifyToken,Validation.upgradePassword,updatePassword)
 router.get('/admin', verifyToken, roleCheck(['admin']), (req, res) => {

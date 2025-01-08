@@ -64,17 +64,20 @@ const me = async (req, res) => {
 }
 
 const getProfile = async (req, res) => {
+    //api/profile authorization : Bearer jwt_token 
     try {
+        console.log("Req.user1:", req.user);
         const userId = req.user.id;
-        const user = await User.findById({ userId }).select("-password")
+        console.log("Kullanıcı ID'si:", userId);
+        const user = await User.findById(userId).select("-password"); // şifreyi getirme
         if (!user) {
-            res.status(404).json({ message: "Kullanıcı Bulunamadı" });
+            return res.status(404).json({ message: "Kullanıcı Bulunamadı" });
         }
         res.status(200).json(user);
     } catch (error) {
-        res.status(404).json({ message: "Kullanıcı Bulunurken Hata" });
+        res.status(500).json({ message: "Kullanıcı Bulunurken Hata" });
     }
-}
+};
 
 const updatePassword = async (req, res, next) => {
     try {
@@ -92,12 +95,18 @@ const updatePassword = async (req, res, next) => {
             return next(new APIError("Mevcut Şifreniz Yanlış", 400));
         }
 
+        //Yeni şifre eski şifreyle aynı olamaz
+        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+        if (isSamePassword) {
+            return next(new APIError("Yeni Şifre Eski Şifreyle Aynı Olamaz", 400));
+        }
+
         // Yeni şifreyi hash'le
         const hashPassword = await bcrypt.hash(newPassword, 8);
         user.password = hashPassword;
         await user.save();
 
-        return new Response(null, "Şifre Başarıyla Değiştirildi").success(res);
+        res.status(200).json({ message: "Başarıyla Değiştirildi.." })
     } catch (error) {
         console.error("Şifre Güncellenirken Hata Oluştu: ", error);
         return next(new APIError("Şifre Güncellenirken Hata Oluştu", 500));
