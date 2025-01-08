@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
-const ERR = require('../util/error');
 const User = require('../model/user');
 const APIError = require('../util/error');
+const Response = require('../util/response');
 require('dotenv').config();
 
 const createToken = async (user, res) => {
@@ -9,36 +9,27 @@ const createToken = async (user, res) => {
         const payload = {
             id: user._id,
             email: user.email,
-            role:user.role
-            
+            role: user.role
+
         };
 
-        
         if (!process.env.JWT_SECRET_KEY) {
-            throw new Error('TOKEN KEY bulunamadı');
+            throw new APIError('TOKEN KEY bulunamadı', 400);
         }
 
-        
         const token = await jwt.sign(payload, process.env.JWT_SECRET_KEY, {
             algorithm: "HS512", // Algoritma
             expiresIn: '1h' // Süre
         }); // Token oluşturuldu
 
-        return res.status(200).json({
-            success: true,
-            token: token,
-            message: "Başarılı Token"
-        });
+        return new Response(token,"Başarılı Token").created(res)
     } catch (error) {
         console.error('Başarısız token:', error);
-        return res.status(500).json({
-            success: false,
-            message: "Token oluşturulamadı",
-            error: error.message
-        });
+        throw new APIError("Token oluşturma esnasında server hatası oluştu", 500);
     }
 };
 const verifyToken = async (req, res, next) => {
+    console.log("verifyToken çalışıyor...");
     try {
         // Authorization Header'dan Bearer Token'ı al
         const headerToken = req.headers.authorization && req.headers.authorization.startsWith("Bearer ");
@@ -57,24 +48,16 @@ const verifyToken = async (req, res, next) => {
         if (!userInfo) {
             throw new APIError("Geçersiz Token", 401);
         }
-
         // Kullanıcı bilgilerini req objesine ekle
         req.user = userInfo;
         next(); // Bir sonraki middleware'e geç
     } catch (error) {
         console.error("Token doğrulama hatası:", error.message);
-        res.status(error.status || 500).json({
-            success: false,
-            message: error.message || "Token doğrulama sırasında bir hata oluştu",
-        });
+        throw new APIError("Token doğrulama sırasında server hatası oluştu", 500);
     }
 };
-
-
-
-
 module.exports = {
     createToken,
     verifyToken,
-    
+
 };

@@ -15,21 +15,21 @@ class Response {
         return res.status(201).json({
             succes: true,
             data: this.data,
-            message: this.massage ?? "İşlem Başarılı"
+            message: this.massage ?? "İşlem Başarıyla Oluşturuldu"
         })
     }
     error500(res) {
         return res.status(500).json({
             succes: false,
             data: this.data,
-            message: this.massage ?? "API HATASI BAŞARISIZ"
+            message: this.massage ?? "Sunucu Hatası"
         })
     }
     error400(res) {
         return res.status(400).json({
             succes: false,
             data: this.data,
-            message: this.massage ?? "BAD REQUEST"
+            message: this.massage ?? "Bad Request"
         })
     }
     error401(res) {
@@ -53,6 +53,13 @@ class Response {
             message: this.massage ?? "Çok Fazla İstek(DDos)"
         })
     }
-}
+    error403(res) {
+        return res.status(403).json({
+            succes: false,
+            data: this.data,
+            message: this.message ?? "Admin Yetkiniz Yok"
 
-module.exports=Response;
+        })
+    }
+}
+module.exports = Response;

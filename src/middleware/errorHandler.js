@@ -5,5 +5,4 @@ const errorHandler = (err, req, res, next) => {
     error: err.message || 'Bir şeyler ters gitti.',
   });
 };
-
 module.exports = errorHandler;

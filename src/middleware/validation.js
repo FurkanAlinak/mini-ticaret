@@ -38,9 +38,9 @@ class Validation {
                 .validateAsync(req.body);
         } catch (error) {
             if (error.details && error.details[0].message) {
-                return next(new APIError(error.details[0].message, 400));
+                throw new APIError(error.details[0].message, 400);
             }
-            return next(new APIError('Lütfen validasyon kurallarına uyun.', 400));
+            throw new APIError('Lütfen validasyon kurallarına uyun.', 400);
         }
         next();
     };
@@ -70,9 +70,9 @@ class Validation {
                 .validateAsync(req.body);
         } catch (error) {
             if (error.details && error.details[0].message) {
-                return next(new APIError(error.details[0].message, 400));
+                throw new APIError(error.details[0].message, 400);
             }
-            return next(new APIError('Lütfen validasyon kurallarına uyun.', 400));
+            throw new APIError('Lütfen validasyon kurallarına uyun.', 400);
         }
         next();
     };
@@ -110,9 +110,9 @@ class Validation {
                 .validateAsync(req.body);
         } catch (error) {
             if (error.details && error.details[0].message) {
-                return next(new APIError(error.details[0].message, 400));
+                throw new APIError(error.details[0].message, 400);
             }
-            return next(new APIError('Lütfen validasyon kurallarına uyun.', 400));
+            throw new APIError('Lütfen validasyon kurallarına uyun.', 400);
         }
         next();
     };

@@ -6,11 +6,11 @@ const getCart = async (req, res, next) => {
   try {
       const cart = await Cart.findOne({ userId: req.user.id }).populate('items.productId', 'name price');
       if (!cart) {
-          return new APIError("Sepet Bulunamadı",404)
+          throw new APIError("Sepet Bulunamadı",404)
       }
       res.status(200).json(cart);
   } catch (error) {
-      next(new APIError("Sepet görüntülenirken hata oluştu", 500));
+     throw new APIError("Sepet görüntülenirken hata oluştu", 500);
   }
 };
 

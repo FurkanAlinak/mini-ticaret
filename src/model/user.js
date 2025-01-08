@@ -30,5 +30,4 @@ const userSchema = new mongoose.Schema({
 },{collection:"users",timestamps:true});//tablo adı ve tarih alanı
 
 const User = mongoose.model('User', userSchema);
-
 module.exports = User;
