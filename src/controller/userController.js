@@ -112,7 +112,6 @@ const updatePassword = async (req, res, next) => {
         return next(new APIError("Şifre Güncellenirken Hata Oluştu", 500));
     }
 };
-
 module.exports = {
     register,
     login,

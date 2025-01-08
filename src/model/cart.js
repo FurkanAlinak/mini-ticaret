@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
 
-const CartSchema = new mongoose.Schema({
+const cartSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -27,4 +28,5 @@ const CartSchema = new mongoose.Schema({
   },
 },{collection:"cart",timestamps:true});
 
-module.exports = mongoose.model('Cart', CartSchema);
+const Cart = mongoose.model("Cart",cartSchema)
+module.exports = Cart;
