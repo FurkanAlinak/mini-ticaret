@@ -1,17 +1,17 @@
-const joi = require("joi"); 
-const APIError = require("../util/error"); 
+const joi = require("joi");
+const APIError = require("../util/error");
 
 class Validasyon {
     static product = async (req, res, next) => {
         try {
-            
+
             const schema = joi.object({
                 name: joi.string().min(2).max(50).required().trim().messages({
-                    "string.base": "İsim alanı metin olmalıdır.",
-                    "string.empty": "İsim alanı boş bırakılamaz.",
-                    "string.min": "İsim alanı en az 2 karakter olmalıdır.",
-                    "string.max": "İsim alanı en fazla 50 karakter olmalıdır.",
-                    "any.required": "İsim alanı zorunludur.",
+                    "string.base": "Ürün ismi alanı metin olmalıdır.",
+                    "string.empty": "Ürün ismi alanı boş bırakılamaz.",
+                    "string.min": "Ürün ismi alanı en az 2 karakter olmalıdır.",
+                    "string.max": "Ürün ismi alanı en fazla 50 karakter olmalıdır.",
+                    "any.required": "Ürün ismi alanı zorunludur.",
                 }),
                 description: joi.string().max(200).trim().messages({
                     "string.base": "Açıklama alanı metin olmalıdır.",
@@ -38,7 +38,7 @@ class Validasyon {
                 }),
             });
 
-            
+
             await schema.validateAsync(req.body);
             next();
         } catch (error) {

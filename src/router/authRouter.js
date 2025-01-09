@@ -5,7 +5,6 @@ const Validasyon = require("../middleware/productValidation");
 const { verifyToken } = require('../middleware/token');
 const roleCheck =require("../middleware/roleCheck")
 
-
 router.post("/register",Validation.register,register);
 router.post("/login",Validation.login,login);
 router.get("/profile",verifyToken,getProfile)

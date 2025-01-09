@@ -1,47 +1,80 @@
 const Product = require("../model/product");
 const Cart = require("../model/cart");
 const APIError = require("../util/error");
+const Response = require("../util/response");
 
 const getCart = async (req, res, next) => {
   try {
-      const cart = await Cart.findOne({ userId: req.user.id }).populate('items.productId', 'name price');
-      if (!cart) {
-          throw new APIError("Sepet Bulunamadı",404)
-      }
-      res.status(200).json(cart);
+    const cart = await Cart.findOne({ userId: req.user.id }).populate('items.productId', 'name price');
+    if (!cart) {
+      throw new APIError("Sepet Bulunamadı", 404);
+    }
+    new Response(cart, "Sepet görüntülendi", 200).succes(res);
   } catch (error) {
-     throw new APIError("Sepet görüntülenirken hata oluştu", 500);
+    new Response(null, "Sepet görüntülenirken hata oluştu", 500).error500(res);
   }
 };
 
 const addToCart = async (req, res, next) => {
   try {
-      const { productId, quantity } = req.body;
+    const { productId, quantity } = req.body;
 
-      let cart = await Cart.findOne({ userId: req.user.id });
-      if (!cart) {
-          cart = new Cart({ userId: req.user.id, items: [] });
+    let cart = await Cart.findOne({ userId: req.user.id });
+    if (!cart) {
+      cart = new Cart({ userId: req.user.id, items: [] });
+    }
+
+    const productIndex = cart.items.findIndex(item => item.productId.toString() === productId);
+
+    if (productIndex > -1) {
+      cart.items[productIndex].quantity += quantity;
+    } else {
+      const product = await Product.findById(productId);
+      if (!product) {
+        return next(new APIError("Ürün bulunamadı", 404));
       }
+      cart.items.push({ productId, quantity, price: product.price });
+    }
 
-      const productIndex = cart.items.findIndex(item => item.productId.toString() === productId);
+    cart.totalPrice = cart.items.reduce((total, item) => total + item.quantity * item.price, 0);
+    await cart.save();
 
-      if (productIndex > -1) {
-          cart.items[productIndex].quantity += quantity;
-      } else {
-          const product = await Product.findById(productId);
-          if (!product) {
-              return next(new APIError("Ürün bulunamadı", 404));
-          }
-          cart.items.push({ productId, quantity, price: product.price });
-      }
-
-      cart.totalPrice = cart.items.reduce((total, item) => total + item.quantity * item.price, 0);
-      await cart.save();
-
-      res.status(200).json({ success: true, message: "Ürün sepete eklendi", cart });
+    new Response(cart, "Ürün sepete eklendi", 200).succes(res);
   } catch (error) {
-      next(new APIError("Ürün sepete eklenirken hata oluştu", 500));
+    new Response(null, "Ürün sepete eklenirken hata oluştu", 500).error500(res);
   }
 };
 
-  
+const removeFromCart = async (req, res, next) => {
+  try {
+    const { productId } = req.body;
+    const cart = await Cart.findOne({ userId: req.user.id });
+    if (!cart) {
+      throw new APIError("Sepet Bulunamadı", 404);
+    }
+    await cart.removeItem(productId);
+    new Response(cart, "Ürün sepetten çıkarıldı", 200).succes(res);
+  } catch (error) {
+    new Response(null, "Ürün sepetten çıkarılırken hata oluştu", 500).error500(res);
+  }
+};
+
+const deleteCart = async (req, res, next) => {
+  try {
+    const cart = await Cart.findOneAndDelete({ userId: req.user.id });
+    if (!cart) {
+      throw new APIError("Sepet Bulunamadı", 404);
+    }
+    new Response(null, "Sepet silindi", 200).succes(res);
+  } catch (error) {
+    new Response(null, "Sepet silinirken hata oluştu", 500).error500(res);
+  }
+};
+
+module.exports = {
+  getCart,
+  addToCart,
+  removeFromCart,
+  deleteCart
+};
+
