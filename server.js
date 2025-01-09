@@ -5,7 +5,9 @@ require('dotenv').config();
 
 //bağlantılar
 require("./src/db/dbConnection")
-const router = require("./src/router/index");
+const authRouter = require("./src/router/authRouter");
+const productRouter = require("./src/router/productRouter");
+const adminRouter = require("./src/router/adminRouter");
 const errorHandler = require("./src/middleware/errorHandler");
 
 //port .env dosyasından alınıyor
@@ -15,7 +17,9 @@ const port = process.env.PORT || 3001;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", router)
+app.use("/auth", authRouter);
+app.use("/product", productRouter);
+app.use("/admin",adminRouter);
 
 app.get('/', (req, res) => {
     res.json({ message: 'Mini E-Ticaret Sitesi' });
