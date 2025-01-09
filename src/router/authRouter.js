@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const {register,login, me, getProfile, updatePassword, userControl} = require("../controller/userController");
 const Validation = require("../middleware/validation");
-const Validasyon = require("../middleware/productValidation");
 const { verifyToken } = require('../middleware/token');
 const roleCheck =require("../middleware/roleCheck")
 

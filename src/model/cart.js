@@ -28,5 +28,15 @@ const cartSchema = new mongoose.Schema({
   },
 },{collection:"cart",timestamps:true});
 
+cartSchema.methods.removeItem = function(productId) {
+  const itemIndex = this.items.findIndex(item => item.product.toString() === productId);
+  if (itemIndex > -1) {
+    this.items.splice(itemIndex, 1);
+    this.totalPrice = this.items.reduce((total, item) => total + item.quantity * item.price, 0);
+    return this.save();
+  }
+  return Promise.reject(new Error('Item not found in cart'));
+};
+
 const Cart = mongoose.model("Cart",cartSchema)
 module.exports = Cart;

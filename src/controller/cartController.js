@@ -16,34 +16,41 @@ const getCart = async (req, res, next) => {
 };
 
 const addToCart = async (req, res, next) => {
-  try {
-    const { productId, quantity } = req.body;
-
-    let cart = await Cart.findOne({ userId: req.user.id });
-    if (!cart) {
-      cart = new Cart({ userId: req.user.id, items: [] });
-    }
-
-    const productIndex = cart.items.findIndex(item => item.productId.toString() === productId);
-
-    if (productIndex > -1) {
-      cart.items[productIndex].quantity += quantity;
-    } else {
-      const product = await Product.findById(productId);
-      if (!product) {
-        return next(new APIError("Ürün bulunamadı", 404));
+    try {
+      const { productId, quantity } = req.body;
+        console.log(productId,quantity);
+      if (!productId || !quantity || quantity <= 0) {
+        throw new APIError("Geçersiz ürün ID veya miktar", 400);
       }
-      cart.items.push({ productId, quantity, price: product.price });
+
+      let cart = await Cart.findOne({ userId: req.user.id });
+      if (!cart) {
+        cart = new Cart({ userId: req.user.id, items: [] });
+      }
+      console.log(cart);
+      const productIndex = cart.items.findIndex(item => item.productId.toString() === productId);
+  
+      if (productIndex > -1) {
+        // Ürün zaten varsa miktarı güncelle
+        cart.items[productIndex].quantity += quantity;
+      } else {
+        // Ürün sepette yoksa, ürün veritabanında var mı kontrol et
+        const product = await Product.findById(productId);
+        if (!product) {
+          throw new APIError("Ürün bulunamadı", 404);
+        }
+        cart.items.push({ productId, quantity, price: product.price });
+      }
+  
+      // Toplam fiyatı güncelle
+      cart.totalPrice = cart.items.reduce((total, item) => total + item.quantity * item.price, 0);
+      await Cart.save();
+  
+      new Response(cart, "Ürün sepete eklendi", 200).succes(res);
+    } catch (error) {
+      next(error); // Hataları error middleware'e ilet
     }
-
-    cart.totalPrice = cart.items.reduce((total, item) => total + item.quantity * item.price, 0);
-    await cart.save();
-
-    new Response(cart, "Ürün sepete eklendi", 200).succes(res);
-  } catch (error) {
-    new Response(null, "Ürün sepete eklenirken hata oluştu", 500).error500(res);
-  }
-};
+  };
 
 const removeFromCart = async (req, res, next) => {
   try {
