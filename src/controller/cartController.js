@@ -5,9 +5,9 @@ const Response = require("../util/response");
 
 const getCart = async (req, res, next) => {
   try {
-    const cart = await Cart.findOne({ userId: req.user.id }).populate('items.productId', 'name price');
+    const cart = await Cart.findOne({ userId: req.user.id }).populate('items.productId', 'name price description');
     if (!cart) {
-      throw new APIError("Sepet Bulunamadı", 404);
+      return new Response(cart,"Sepetiniz boş").error400(res)
     }
     new Response(cart, "Sepet görüntülendi", 200).succes(res);
   } catch (error) {
@@ -44,27 +44,38 @@ const addToCart = async (req, res, next) => {
   
       // Toplam fiyatı güncelle
       cart.totalPrice = cart.items.reduce((total, item) => total + item.quantity * item.price, 0);
-      await Cart.save();
-  
+      
+      await cart.save()
+      console.log("cartıd",cart);
       new Response(cart, "Ürün sepete eklendi", 200).succes(res);
     } catch (error) {
-      next(error); // Hataları error middleware'e ilet
+      throw APIError("Server Hatası",500) // Hataları error middleware'e ilet
     }
   };
 
-const removeFromCart = async (req, res, next) => {
-  try {
-    const { productId } = req.body;
-    const cart = await Cart.findOne({ userId: req.user.id });
-    if (!cart) {
-      throw new APIError("Sepet Bulunamadı", 404);
+  const removeFromCart = async (req, res, next) => {
+    try {
+      const { productId } = req.body;
+  
+      if (!productId) {
+        throw new APIError("Ürün ID'si zorunludur", 400);
+      }
+  
+      const cart = await Cart.findOne({ userId: req.user.id });
+      if (!cart) {
+        throw new APIError("Sepet Bulunamadı", 404);
+      }
+  
+      // Sepetten ürünü çıkar
+      await cart.removeItem(productId);
+  
+      // Başarılı yanıt döndür
+      new Response(cart, "Ürün sepetten çıkarıldı", 200).succes(res);
+    } catch (error) {
+      next(error); // Hata middleware'ine gönder
     }
-    await cart.removeItem(productId);
-    new Response(cart, "Ürün sepetten çıkarıldı", 200).succes(res);
-  } catch (error) {
-    new Response(null, "Ürün sepetten çıkarılırken hata oluştu", 500).error500(res);
-  }
-};
+  };
+  
 
 const deleteCart = async (req, res, next) => {
   try {

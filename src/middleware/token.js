@@ -53,7 +53,7 @@ const verifyToken = async (req, res, next) => {
         next(); // Bir sonraki middleware'e geç
     } catch (error) {
         console.error("Token doğrulama hatası:", error.message);
-        throw new APIError("Token doğrulama sırasında server hatası oluştu", 500);
+        throw new APIError("Tokenın süresi dolmuş lütfen yeniden token alınız", 500);
     }
 };
 module.exports = {
