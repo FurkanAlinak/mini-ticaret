@@ -33,7 +33,9 @@ class Validation {
                         "string.max": "Şifre alanı en fazla 20 karakter olmalıdır.",
                         "any.required": "Şifre alanı zorunludur.",
                     }),
-                    role: joi.string(),
+                    role: joi.string().message({
+                        "string.base": "Role alanı metin olmalıdır.",
+                    })
                 })
                 .validateAsync(req.body);
         } catch (error) {

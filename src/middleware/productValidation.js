@@ -36,6 +36,11 @@ class Validasyon {
                     "number.positive": "Fiyat pozitif bir sayı olmalıdır.",
                     "any.required": "Fiyat alanı zorunludur.",
                 }),
+                stock : joi.number().positive().required().messages({
+                    "number.base":"Stok bir sayı olmalıdır.",
+                    "number.positive": "Fiyat pozitif bir sayı olmalıdır.",
+                    "any.required": "Fiyat alanı zorunludur.",
+                })
             });
 
 

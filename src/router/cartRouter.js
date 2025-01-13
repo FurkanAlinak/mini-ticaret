@@ -1,6 +1,7 @@
 const { addToCart, getCart, deleteCart, removeFromCart } = require("../controller/cartController");
 const router = require("express").Router();
 const { verifyToken } = require('../middleware/token');
+const Validasyon=require("../middleware/cartProductValidation")
 
 
 router.post("/addcart",verifyToken,addToCart);

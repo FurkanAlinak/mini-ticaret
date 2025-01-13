@@ -5,7 +5,7 @@ const Response = require("../util/response")
 //Ürün ekleme
 const addProduct = async (req, res, next) => {
     try {
-        const { name, price, description, category, brand } = req.body;
+        const { name, price, description, category, brand , stock} = req.body;
 
         
         const newProduct = new Product({
@@ -14,6 +14,7 @@ const addProduct = async (req, res, next) => {
             description,
             category,
             brand,
+            stock,
             createdBy: req.user._id, // Token'dan gelen admin bilgisi
         });
         await newProduct.save();
